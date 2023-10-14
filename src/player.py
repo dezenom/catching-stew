@@ -1,21 +1,23 @@
 import pygame,math
 from tools import frames
-from bending.earth import movement,defense,basic_attack
 from particles.basic import particle_system
 
 particle1 = particle_system()
 
 class health():
     def __init__(self):
-        self.healthmax = 60
-        self.current_health = 30
-        self.rect = pygame.FRect(0,40,2,20)
+        self.healthmax = 125
+        self.current_health = 125
+        self.bar_image = pygame.image.load('res/health bar.png').convert_alpha()
+        self.barrect = self.bar_image.get_frect(topleft = (0,0))
+        self.rect = pygame.FRect(0,10,2,25)
     def draw(self,screen):
         if self.current_health > 0:
             for i in range(self.current_health):
-                pos = i+40
+                pos = i+20
                 self.rect.x = pos
-                pygame.draw.rect(screen,'blue',self.rect)
+                pygame.draw.rect(screen,(255,46,98),self.rect)
+        screen.blit(self.bar_image,self.barrect)
 
 
 class player():
@@ -94,14 +96,16 @@ class player():
     def dash(self):
         self.speedx = 13
         self.rect.x += self.speedx * self.direction.x
-    def dash_cooldown_draw(self):
+    def cooldowns_draw(self):
+        self.immunity += 1 if self.immunity < 110 else 0
         self.dash_cooldown -= 0.1 if self.dash_cooldown > 0 else 0
-        pygame.draw.circle(self.screen,'cyan',(self.rect.x + self.rect.w/2,self.rect.y -20),self.dash_cooldown)
+        pygame.draw.circle(self.screen,'cyan',(self.rect.x,self.rect.y -20),self.dash_cooldown/2)
+        pygame.draw.circle(self.screen,(255,200,200),(self.rect.x + self.rect.w,self.rect.y -20),self.immunity/20)
     def movement(self):
         self.gravity = 0 if self.speedx > 6 else 0.8
         if self.on_ground:
             self.jumpcount = 0
-        self.dash_cooldown_draw()
+        self.cooldowns_draw()
         self.keys()
         self.applyfriction()
     #  animation

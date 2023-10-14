@@ -9,6 +9,6 @@ clock = pygame.time.Clock()
 games = game(width,height,screen,listlevel)
 while True:
     clock.tick(60)
-    screen.fill("red")
+    screen.fill("grey")
     games.run()
     pygame.display.flip() 

@@ -17,16 +17,18 @@ class game():
         self.group = pygame.sprite.Group()
         tools.set_listtiles(self.group,self.level,16,'t','White',"normal block")
         tools.set_listtiles(self.group,self.level,16,'r','black',"trap")
-        self.phsyics_bodies = [x.rect for x in self.group]
+        tools.set_listtiles(self.group,self.level,16,'h','light green',"heal")
+        self.phsyics_bodies = [x.rect for x in self.group if x.name == 'normal block']
 
-    def trap(self):
-        self.player.immunity += 1 if self.player.immunity < 110 else 0
-        for traps in self.group.sprites():
-            if traps.name == 'trap' and traps.rect.colliderect(self.player.rect) and self.player.immunity > 100:
-                self.player.damage_timer = 10
+    def special_blocks(self):
+        for blocks in self.group.sprites():
+            if blocks.name == 'trap' and blocks.rect.colliderect(self.player.rect) and self.player.immunity > 100:
+                self.player.damage_timer = 40
                 self.player.direction.y = -6
                 self.player.speedx = 6
                 self.player.immunity = 0
+            if blocks.name == 'heal' and blocks.rect.colliderect(self.player.rect):
+                self.player.heal_timer += 4
 
     def position_info(self):
         entities = []
@@ -36,12 +38,14 @@ class game():
         return entities  
     def load_pos(self):
         index = -1
-        if pygame.key.get_pressed()[pygame.K_r]:
+        if pygame.key.get_pressed()[pygame.K_r] or self.player.health_points.current_health<0:
             for sprite in self.group.sprites():
                 index +=1
                 sprite.rect.x,sprite.rect.y = self.entites[index][0],self.entites[index][1]
             self.player.rect.x,self.player.rect.y = self.entites[-1][0],self.entites[-1][1]
-            self.player.direction.y = 0               
+            self.player.direction.y = 0  
+            self.player.health_points.current_health = self.player.health_points.healthmax
+            self.player.damage_timer,self.player.heal_timer = 0,0             
     def getscroll(self):
         scroll = [0,0]
         scroll[0] += self.player.rect.x - scroll[0] - self.screen_w/2
@@ -81,4 +85,4 @@ class game():
         self.event_handler()
         self.spritecontrol()
         self.load_pos()
-        self.trap()
+        self.special_blocks()

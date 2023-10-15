@@ -12,6 +12,9 @@ class game():
         self.level_creation()
         self.spawns()
         self.entites = self.position_info()
+        # menu
+        self.click = False
+        self.pause = False
 #   level
     def level_creation(self):
         self.group = pygame.sprite.Group()
@@ -74,6 +77,10 @@ class game():
                     self.player.jump = True
                 if event.key == pygame.K_q:
                     self.player.heal_timer +=30
+                if event.key == pygame.K_ESCAPE:
+                    self.pause = not self.pause
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.click = True
 # sprites
     def spritecontrol(self):
         self.camera()

@@ -17,7 +17,7 @@ class buttons ():
     def __init__(self,pos,screen,scale,imagepath) :
         self.screen = screen
         image = pygame.image.load(imagepath).convert_alpha()
-        self.image = pygame.transform.scale_by(image,scale)
+        self.image = pygame.transform.scale(image,scale)
         self.rect = self.image.get_frect(topleft = pos)
         self.collide = False
     def update(self,text):
@@ -30,7 +30,7 @@ class buttons ():
 
 def render_text(screen,text,pos,fonts,size):
     font = pygame.font.Font(fonts,size)
-    text = font.render(text,False,(85,255,180))
+    text = font.render(text,False,(50,50,50))
     rect = text.get_rect(center = pos)
     screen.blit(text,rect)
     

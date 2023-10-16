@@ -17,24 +17,21 @@ class buttons ():
     def __init__(self,pos,screen,scale,imagepath) :
         self.screen = screen
         image = pygame.image.load(imagepath).convert_alpha()
-        self.image = pygame.transform.scale_by(image,scale)
-        self.rect = self.image.get_frect(center = pos)
+        self.image = pygame.transform.scale(image,scale)
+        self.rect = self.image.get_frect(topleft = pos)
         self.collide = False
-    def update(self,rendertext,text):
-        s = 0
-        s+=1
+    def update(self,text):
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             self.collide = True
         else:
             self.collide = False
-        self.rect.y += math.sin(s)
         self.screen.blit(self.image,self.rect)
-        rendertext(self.screen,text,(self.rect.centerx,self.rect.centery))
+        render_text(self.screen,text,(self.rect.centerx,self.rect.centery),'res/Daydream.ttf',10)
 
 def render_text(screen,text,pos,fonts,size):
     font = pygame.font.Font(fonts,size)
-    text = font.render(text,False,(0,0,0))
-    rect = text.get_rect(topleft = pos)
+    text = font.render(text,False,(50,50,50))
+    rect = text.get_rect(center = pos)
     screen.blit(text,rect)
     
 def frames(path):

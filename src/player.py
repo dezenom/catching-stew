@@ -140,6 +140,7 @@ class player():
         self.heal_timer -= 1 if self.heal_timer > 0 else 0
         self.heal_timer = 0 if self.health_points.current_health == self.health_points.healthmax else self.heal_timer
         self.damage_timer -= 1 if self.damage_timer > 0 else 0
+        self.heal_timer = 0 if self.health_points.current_health == self.health_points.healthmax else self.heal_timer
         if self.heal_timer > 0 and self.health_points.current_health< self.health_points.healthmax:
             self.heal()
         if self.damage_timer > 0:

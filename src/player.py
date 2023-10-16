@@ -38,7 +38,6 @@ class player():
         # gravity/jump
         self.gravity = 0.8
         self.on_ground = False
-        self.timer = 5
         self.jump = False
         self.jumpcount = 2
         self.jumpmax = 2
@@ -64,7 +63,6 @@ class player():
             self.on_ground = False
             self.jumpcount += 1
             self.direction.y = 0
-            self.timer = 0
             self.jumping(5,self.speedy,40)
         self.jump = False
         if keys[pygame.K_a] and self.speedx < self.maxspeed:
@@ -84,7 +82,6 @@ class player():
         if self.speedx <= 0.1:
             self.speedx = 0
     def applygravity(self):
-        self.on_ground = False if self.timer <= 0 else True
         self.direction.y += self.gravity if self.direction.y < 30 else 0 
         self.rect.y += self.direction.y 
     def jumping(self,repeat,vel,offset):
@@ -102,7 +99,7 @@ class player():
         pygame.draw.circle(self.screen,'cyan',(self.rect.x,self.rect.y -20),self.dash_cooldown/2)
         pygame.draw.circle(self.screen,(255,200,200),(self.rect.x + self.rect.w,self.rect.y -20),self.immunity/20)
     def movement(self):
-        self.gravity = 0 if self.speedx > 6 else 0.8
+        self.direction.y = 0 if self.speedx > 6 else self.direction.y
         if self.on_ground:
             self.jumpcount = 0
         self.cooldowns_draw()
@@ -141,6 +138,7 @@ class player():
         self.health_points.current_health += 1
     def health_control(self):
         self.heal_timer -= 1 if self.heal_timer > 0 else 0
+        self.heal_timer = 0 if self.health_points.current_health == self.health_points.healthmax else self.heal_timer
         self.damage_timer -= 1 if self.damage_timer > 0 else 0
         if self.heal_timer > 0 and self.health_points.current_health< self.health_points.healthmax:
             self.heal()

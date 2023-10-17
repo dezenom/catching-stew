@@ -42,6 +42,7 @@ def main_menu():
         if shop.collide and click:
             shop_menu()
         if exit.collide and click:
+            games.save
             pygame.quit()
             sys.exit()  
         pygame.display.flip()
@@ -81,7 +82,7 @@ def shop_menu():
     pass
 
 def game_loop():
-    global running_game
+    global running_game, games
     pause = buttons((width - 70,5),screen,(50,50),'res/pause_button.png')
     games = game(width,height,screen,listlevel)
     running_game = True
@@ -135,6 +136,7 @@ def pause_menu():
         if exit.collide and click:
             pause_running = False
             running_game = False
+            games.save()
         pygame.display.flip()
  
 main_menu()

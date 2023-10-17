@@ -1,6 +1,9 @@
 import pygame,math
 from tools import frames
 from particles.basic import particle_system
+from save_load_support import save_loadsystem
+
+save_system = save_loadsystem('.save','data')
 
 particle1 = particle_system()
 
@@ -145,6 +148,17 @@ class player():
             self.heal()
         if self.damage_timer > 0:
             self.damge()
+    # variables to be saved
+    def get_current_values(self):
+        self.player_variables = [self.health_points.current_health]
+        return self.player_variables
+    def save_variables(self):
+        save_system.save_all_data([self.player_variables],['player_variables'])
+    def load_variables(self):
+        self.player_variables = save_system.load_all_data(['player_variables'],[self.get_current_values()])
+        self.health_points.current_health = self.player_variables[0]
+        
+
     # update
     def update(self):
         particle1.emit(self.screen)

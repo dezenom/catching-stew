@@ -1,5 +1,8 @@
 import pygame,tools,sys
 from player import player
+from save_load_support import save_loadsystem
+
+save_system = save_loadsystem('.save','data')
 
 damaging = pygame.USEREVENT+1
 class game():
@@ -9,9 +12,13 @@ class game():
         self.screen_w,self.screen_h = screenw,screenh
         self.scroll = (0,0)
         self.camera_entities = []
+        # level/world
         self.level_creation()
         self.spawns()
-        self.entites = self.position_info()
+        # load
+        self.entites_pos = save_system.load_all_data(['entity_pos'],[self.position_info()])
+        self.load_pos()
+        self.player.load_variables()
         # menu
         self.click = False
         self.pause = False
@@ -22,7 +29,6 @@ class game():
         tools.set_listtiles(self.group,self.level,16,'r','black',"trap")
         tools.set_listtiles(self.group,self.level,16,'h','light green',"heal")
         self.phsyics_bodies = [x.rect for x in self.group if x.name == 'normal block']
-
     def special_blocks(self):
         for blocks in self.group.sprites():
             if blocks.name == 'trap' and blocks.rect.colliderect(self.player.rect) and self.player.immunity > 100:
@@ -33,6 +39,8 @@ class game():
             if blocks.name == 'heal' and blocks.rect.colliderect(self.player.rect):
                 self.player.heal_timer += 4
 
+
+# save system,
     def position_info(self):
         entities = []
         for sprite in self.group.sprites():
@@ -41,14 +49,19 @@ class game():
         return entities  
     def load_pos(self):
         index = -1
-        if pygame.key.get_pressed()[pygame.K_r] or self.player.health_points.current_health<0:
-            for sprite in self.group.sprites():
-                index +=1
-                sprite.rect.x,sprite.rect.y = self.entites[index][0],self.entites[index][1]
-            self.player.rect.x,self.player.rect.y = self.entites[-1][0],self.entites[-1][1]
-            self.player.direction.y = 0  
-            self.player.health_points.current_health = self.player.health_points.healthmax
-            self.player.damage_timer,self.player.heal_timer = 0,0             
+        for sprite in self.group.sprites():
+            index +=1
+            sprite.rect.x,sprite.rect.y = self.entites_pos[index][0],self.entites_pos[index][1]
+        self.player.rect.x,self.player.rect.y = self.entites_pos[-1][0],self.entites_pos[-1][1]
+        self.player.direction.y = 0  
+        self.player.damage_timer,self.player.heal_timer = 0,0
+    def save(self):
+        self.entites_pos = self.position_info()
+        save_system.save_all_data([self.entites_pos],['entity_pos'])
+        
+        self.player.player_variables = self.player.get_current_values()
+        self.player.save_variables()
+#camera  
     def getscroll(self):
         scroll = [0,0]
         scroll[0] += self.player.rect.x - scroll[0] - self.screen_w/2
@@ -70,6 +83,7 @@ class game():
     def event_handler(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.save()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -91,5 +105,4 @@ class game():
     def run(self):
         self.event_handler()
         self.spritecontrol()
-        self.load_pos()
         self.special_blocks()

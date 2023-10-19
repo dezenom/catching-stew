@@ -61,6 +61,15 @@ class game():
         
         self.player.player_variables = self.player.get_current_values()
         self.player.save_variables()
+    def checkpoints(self):
+        if self.player.steps > self.player.maxsteps and self.player.on_ground and self.player.speedx == 0:
+            self.save()
+            self.player.steps = 0
+    def respawn(self):
+        if self.player.health_points.current_health <= 0 or self.player.rect.y > self.screen_h+20:
+            self.load_pos()
+            self.player.health_points.current_health = self.player.health_points.healthmax
+        
 #camera  
     def getscroll(self):
         scroll = [0,0]
@@ -103,6 +112,8 @@ class game():
         tools.platformer_physics(self.player,self.phsyics_bodies)
         self.group.update(self.scroll)
     def run(self):
+        self.checkpoints()
+        self.respawn()
         self.event_handler()
         self.spritecontrol()
         self.special_blocks()

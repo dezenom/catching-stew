@@ -104,9 +104,9 @@ def game_loop():
         pygame.display.flip()
 def pause_menu():
     global running_game
-    resume = buttons((width/2 -40,50),screen,(100,50),'res/button.png')
-    options = buttons((width/2 -145,50+resume.rect.h + 30),screen,(150,50),'res/button.png')
-    exit = buttons((width/2 -40,50+resume.rect.h*2 + 60),screen,(220,50),'res/button.png')
+    resume = buttons((width/2 -40,70),screen,(100,50),'res/button.png')
+    options = buttons((width/2 -145,70+resume.rect.h + 30),screen,(150,50),'res/button.png')
+    exit = buttons((width/2 -40,70+resume.rect.h*2 + 60),screen,(220,50),'res/button.png')
     pause_running = True
     while pause_running:
         screen.fill((0, 255, 255), None, pygame.BLEND_RGBA_MULT)

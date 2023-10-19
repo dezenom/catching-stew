@@ -22,7 +22,6 @@ class health():
                 pygame.draw.rect(screen,(255,46,98),self.rect)
         screen.blit(self.bar_image,self.barrect)
 
-
 class player():
     def __init__(self,pos,screen):
         self.screen = screen
@@ -37,6 +36,7 @@ class player():
         self.maxspeed = 5
         self.acceleration = 0.8
 
+        self.dash_speed = 15
         self.dash_cooldown = 0
         # gravity/jump
         self.gravity = 0.8
@@ -55,6 +55,9 @@ class player():
         self.heal_timer = 0
         self.damage_timer = 0
         self.immunity = 0
+        # extra
+        self.steps = 0
+        self.maxsteps = 1000
 
     # player movement
     def keys(self):
@@ -94,8 +97,7 @@ class player():
         for i in range(repeat * self.jumpcount):
             particle1.add_particle([self.rect.centerx,self.rect.y+offset])
     def dash(self):
-        self.speedx = 13
-        self.rect.x += self.speedx * self.direction.x
+        self.speedx = self.dash_speed
     def cooldowns_draw(self):
         self.immunity += 1 if self.immunity < 110 else 0
         self.dash_cooldown -= 0.1 if self.dash_cooldown > 0 else 0
@@ -103,8 +105,13 @@ class player():
         pygame.draw.circle(self.screen,(255,200,200),(self.rect.x + self.rect.w,self.rect.y -20),self.immunity/20)
     def movement(self):
         self.direction.y = 0 if self.speedx > 6 else self.direction.y
+        if self.direction.y > 0 or self.direction.y < 0:
+            self.on_ground = False
         if self.on_ground:
             self.jumpcount = 0
+        
+        
+        self.steps += self.speedx
         self.cooldowns_draw()
         self.keys()
         self.applyfriction()

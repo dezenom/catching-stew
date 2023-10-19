@@ -97,5 +97,6 @@ def platformer_physics(player,physics_bodies):
                 elif player.direction.y < 0:
                     player.rect.top = rect.bottom
                     player.direction.y = 0
+            
     ycollision()
     xcollision()

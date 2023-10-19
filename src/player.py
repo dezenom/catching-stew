@@ -1,5 +1,5 @@
 import pygame,math
-from tools import frames
+from tools import frames,render_text
 from particles.basic import particle_system
 from save_load_support import save_loadsystem
 
@@ -13,6 +13,8 @@ class health():
         self.current_health = 125
         self.bar_image = pygame.image.load('res/health bar.png').convert_alpha()
         self.barrect = self.bar_image.get_frect(topleft = (0,0))
+        self.potion_ref =  pygame.transform.scale_by(pygame.image.load('res/potion.png').convert_alpha(),2)
+        self.potion_rect = self.potion_ref.get_rect(topleft = (self.barrect.w+10,10))
         self.rect = pygame.FRect(0,10,2,25)
     def draw(self,screen):
         if self.current_health > 0:
@@ -21,6 +23,7 @@ class health():
                 self.rect.x = pos
                 pygame.draw.rect(screen,(255,46,98),self.rect)
         screen.blit(self.bar_image,self.barrect)
+        screen.blit(self.potion_ref,self.potion_rect)
 
 class player():
     def __init__(self,pos,screen):
@@ -51,10 +54,13 @@ class player():
         self.is_left = False
         self.getframes()
         # health
-        self.health_points=health()
+        self.hp=health()
         self.heal_timer = 0
         self.damage_timer = 0
         self.immunity = 0
+
+        self.potions = 0
+        self.potion_cooldown = 0
         # extra
         self.steps = 0
         self.maxsteps = 1000
@@ -101,6 +107,10 @@ class player():
     def cooldowns_draw(self):
         self.immunity += 1 if self.immunity < 110 else 0
         self.dash_cooldown -= 0.1 if self.dash_cooldown > 0 else 0
+        self.potion_cooldown -= 1 if self.potion_cooldown > 0 else 0
+
+        
+        pygame.draw.circle(self.screen,'violet',(self.hp.potion_rect.bottomright),self.potion_cooldown/4)
         pygame.draw.circle(self.screen,'cyan',(self.rect.x,self.rect.y -20),self.dash_cooldown/2)
         pygame.draw.circle(self.screen,(255,200,200),(self.rect.x + self.rect.w,self.rect.y -20),self.immunity/20)
     def movement(self):
@@ -143,27 +153,32 @@ class player():
                 self.status = 'run'
     # health 
     def damge(self):
-        self.health_points.current_health -= 1
+        self.hp.current_health -= 1
     def heal(self):
-        self.health_points.current_health += 1
+        self.hp.current_health += 1
     def health_control(self):
         self.heal_timer -= 1 if self.heal_timer > 0 else 0
-        self.heal_timer = 0 if self.health_points.current_health == self.health_points.healthmax else self.heal_timer
+        self.heal_timer = 0 if self.hp.current_health == self.hp.healthmax else self.heal_timer
         self.damage_timer -= 1 if self.damage_timer > 0 else 0
-        self.heal_timer = 0 if self.health_points.current_health == self.health_points.healthmax else self.heal_timer
-        if self.heal_timer > 0 and self.health_points.current_health< self.health_points.healthmax:
+
+        if self.heal_timer > 0 and self.hp.current_health< self.hp.healthmax:
             self.heal()
         if self.damage_timer > 0:
             self.damge()
+        if pygame.key.get_pressed()[pygame.K_q]and self.potions >0 and not self.potion_cooldown> 0 and self.hp.current_health!=self.hp.healthmax:
+            self.heal_timer = 20
+            self.potion_cooldown = 40
+            self.potions -= 1
     # variables to be saved
     def get_current_values(self):
-        self.player_variables = [self.health_points.current_health]
+        self.player_variables = [(self.hp.current_health,self.potions,self.potions,'healths')]
         return self.player_variables
     def save_variables(self):
         save_system.save_all_data([self.player_variables],['player_variables'])
     def load_variables(self):
         self.player_variables = save_system.load_all_data(['player_variables'],[self.get_current_values()])
-        self.health_points.current_health = self.player_variables[0]
+        self.hp.current_health = self.player_variables[0][0]
+        self.potions = self.player_variables[0][1]
         
 
     # update
@@ -173,4 +188,6 @@ class player():
         self.movement()
         self.animation()
         self.health_control()
-        self.health_points.draw(self.screen)
+        self.hp.draw(self.screen)
+
+        render_text(self.screen,f'{self.potions}',self.hp.potion_rect.bottomleft,'res/Daydream.ttf',10)

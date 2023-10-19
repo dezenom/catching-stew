@@ -3,8 +3,6 @@ from player import player
 from save_load_support import save_loadsystem
 
 save_system = save_loadsystem('.save','data')
-
-damaging = pygame.USEREVENT+1
 class game():
     def __init__(self,screenw,screenh,display,level):
         self.screen = display
@@ -25,9 +23,10 @@ class game():
 #   level
     def level_creation(self):
         self.group = pygame.sprite.Group()
-        tools.set_listtiles(self.group,self.level,16,'t','White',"normal block")
-        tools.set_listtiles(self.group,self.level,16,'r','black',"trap")
-        tools.set_listtiles(self.group,self.level,16,'h','light green',"heal")
+        tools.set_listtiles(self.group,self.level,16,'t','White',"normal block",True,pygame.Surface((16,16)),False)
+        tools.set_listtiles(self.group,self.level,16,'r','black',"trap",True,pygame.Surface((16,16)),False)
+        tools.set_listtiles(self.group,self.level,16,'h','light green',"heal",True,pygame.Surface((16,16)),False)
+        tools.set_listtiles(self.group,self.level,16,'p',None,"potion",False,pygame.image.load('res/potion.png').convert_alpha(),True)
         self.phsyics_bodies = [x.rect for x in self.group if x.name == 'normal block']
     def special_blocks(self):
         for blocks in self.group.sprites():
@@ -38,20 +37,23 @@ class game():
                 self.player.immunity = 0
             if blocks.name == 'heal' and blocks.rect.colliderect(self.player.rect):
                 self.player.heal_timer += 4
+            if blocks.name == 'potion' and blocks.rect.colliderect(self.player.rect) and not blocks.picked:
+                blocks.picked = True
+                self.player.potions += 1
 
 
 # save system,
     def position_info(self):
         entities = []
         for sprite in self.group.sprites():
-            entities.append((sprite.rect.x,sprite.rect.y))
+            entities.append(((sprite.rect.x,sprite.rect.y),sprite.picked))
         entities.append((self.player.rect.x,self.player.rect.y))
-        return entities  
+        return entities 
     def load_pos(self):
         index = -1
         for sprite in self.group.sprites():
             index +=1
-            sprite.rect.x,sprite.rect.y = self.entites_pos[index][0],self.entites_pos[index][1]
+            sprite.rect.x,sprite.rect.y,sprite.picked = self.entites_pos[index][0][0],self.entites_pos[index][0][1],self.entites_pos[index][1]
         self.player.rect.x,self.player.rect.y = self.entites_pos[-1][0],self.entites_pos[-1][1]
         self.player.direction.y = 0  
         self.player.damage_timer,self.player.heal_timer = 0,0
@@ -66,9 +68,9 @@ class game():
             self.save()
             self.player.steps = 0
     def respawn(self):
-        if self.player.health_points.current_health <= 0 or self.player.rect.y > self.screen_h+20:
+        if self.player.hp.current_health <= 0 or self.player.rect.y > self.screen_h+20:
             self.load_pos()
-            self.player.health_points.current_health = self.player.health_points.healthmax
+            self.player.hp.current_health = self.player.hp.healthmax
         
 #camera  
     def getscroll(self):
@@ -98,8 +100,6 @@ class game():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w or event.key == pygame.K_SPACE:
                     self.player.jump = True
-                if event.key == pygame.K_q:
-                    self.player.heal_timer +=30
                 if event.key == pygame.K_ESCAPE:
                     self.pause = not self.pause
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -107,7 +107,8 @@ class game():
 # sprites
     def spritecontrol(self):
         self.camera()
-        self.group.draw(self.screen)
+        for sprites in self.group.sprites():
+            sprites.draw(self.screen)
         self.player.update()
         tools.platformer_physics(self.player,self.phsyics_bodies)
         self.group.update(self.scroll)

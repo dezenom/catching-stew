@@ -2,19 +2,15 @@ import pygame,math
 from os import walk
 
 class tile(pygame.sprite.Sprite):
-    def __init__(self,pos,surf,group,colour,name,fill,interactable):
+    def __init__(self,pos,surf,group,colour,name,fill,x,y):
         super().__init__(group)
         self.image = surf
         if fill:
             self.image.fill(colour)
         self.name = name
-        self.picked = False
-        self.interactable = interactable
+        self.level_x,self.level_y = x,y
         self.rect = self.image.get_frect(topleft=pos)
         self.mask = pygame.mask.from_surface(self.image)
-    def draw(self,screen):
-        if not self.picked:
-            screen.blit(self.image,self.rect)
     def update(self,direction):
         self.rect.x -= direction[0]
         self.rect.y -= direction[1]
@@ -69,19 +65,19 @@ def collision_list(group,playergroup):
             hit_list.append(sprite)
     return hit_list
 
-def set_pytmx_tiles(layer_name,group,level,colour,tile_name,fill,interactable):
+def set_pytmx_tiles(layer_name,group,level,colour,tile_name,fill):
         for x,y,surf in level.get_layer_by_name(layer_name).tiles():
             pos = x*16,y*16
             surf = surf
-            tiles = tile(pos,surf,group,colour,tile_name,fill,interactable) 
+            tiles = tile(pos,surf,group,colour,tile_name,fill) 
 
-def set_listtiles(group,level,size,tilesign,colour,name,fill,surface,interactable):
-    for col_index,col in enumerate(level):
-        for row_index,row in enumerate(col):
-            y = col_index * size
-            x = row_index * size
+def set_listtiles(group,level,size,tilesign,colour,name,fill,surface):
+    for row_index,col in enumerate(level):
+        for col_index,row in enumerate(col):
+            y = row_index * size
+            x = col_index * size
             if row == tilesign:
-                tiles = tile((x,y),surface,group,colour,name,fill,interactable)
+                tiles = tile((x,y),surface,group,colour,name,fill,col_index,row_index)
 
 def platformer_physics(player,physics_bodies):
     def xcollision():

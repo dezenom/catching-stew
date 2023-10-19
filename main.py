@@ -12,6 +12,7 @@ screen = pygame.display.set_mode((width,height),pygame.SCALED)
 clock = pygame.time.Clock()
 
 def main_menu():
+    global games
     play = buttons((20,50),screen,(100,50),'res/button.png')
     options = buttons((20,50+play.rect.h + 30),screen,(150,50),'res/button.png')
     shop = buttons((20,50+play.rect.h*2 + 60),screen,(180,50),'res/button.png')
@@ -139,4 +140,4 @@ def pause_menu():
             games.save()
         pygame.display.flip()
 
-main_menu()
+game_loop()

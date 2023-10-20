@@ -115,8 +115,6 @@ class player():
         pygame.draw.circle(self.screen,(255,200,200),(self.rect.x + self.rect.w,self.rect.y -20),self.immunity/20)
     def movement(self):
         self.direction.y = 0 if self.speedx > 6 else self.direction.y
-        if self.direction.y > 0 or self.direction.y < 0:
-            self.on_ground = False
         if self.on_ground:
             self.jumpcount = 0
         

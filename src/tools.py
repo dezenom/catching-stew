@@ -1,14 +1,19 @@
 import pygame,math
 from os import walk
 
+def get_image(size,image_source,frame):
+    image = pygame.Surface((size,size))
+    image.blit(pygame.image.load(image_source),(frame*-size,0,size,size))
+    image.set_colorkey((0,0,0))
+
+    return image
+
 class tile(pygame.sprite.Sprite):
-    def __init__(self,pos,surf,group,colour,name,fill,x,y):
+    def __init__(self,pos,imagesource,group,name,frame,x,y,z):
         super().__init__(group)
-        self.image = surf
-        if fill:
-            self.image.fill(colour)
+        self.image = get_image(16,imagesource,frame)
         self.name = name
-        self.level_x,self.level_y = x,y
+        self.level_x,self.level_y,self.level_z = x,y,z
         self.rect = self.image.get_frect(topleft=pos)
         self.mask = pygame.mask.from_surface(self.image)
     def update(self,direction):
@@ -65,19 +70,13 @@ def collision_list(group,playergroup):
             hit_list.append(sprite)
     return hit_list
 
-def set_pytmx_tiles(layer_name,group,level,colour,tile_name,fill):
-        for x,y,surf in level.get_layer_by_name(layer_name).tiles():
-            pos = x*16,y*16
-            surf = surf
-            tiles = tile(pos,surf,group,colour,tile_name,fill) 
-
-def set_listtiles(group,level,size,tilesign,colour,name,fill,surface):
-    for row_index,col in enumerate(level):
-        for col_index,row in enumerate(col):
+def set_listtiles(group,level,size,name,imagesource,zpos):
+    for row_index,row in enumerate(level):
+        for col_index,col in enumerate(row):
             y = row_index * size
             x = col_index * size
-            if row == tilesign:
-                tiles = tile((x,y),surface,group,colour,name,fill,col_index,row_index)
+            if col>-1:
+                tiles = tile((x,y),imagesource,group,name,col,col_index,row_index,zpos)
 
 def platformer_physics(player,physics_bodies):
     def xcollision():
@@ -99,6 +98,8 @@ def platformer_physics(player,physics_bodies):
                 elif player.direction.y < 0:
                     player.rect.top = rect.bottom
                     player.direction.y = 0
+        if player.direction.y > 1 or player.direction.y < 0:
+            player.on_ground = False
             
     ycollision()
     xcollision()

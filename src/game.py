@@ -24,10 +24,8 @@ class game():
     def level_creation(self):
         self.group = pygame.sprite.Group()
         size = 16
-        tools.set_listtiles(self.group,self.level,size,'t','White',"normal block",True,pygame.Surface((size,size)))
-        tools.set_listtiles(self.group,self.level,size,'r','black',"trap",True,pygame.Surface((size,size)))
-        tools.set_listtiles(self.group,self.level,size,'h','light green',"heal",True,pygame.Surface((size,size)))
-        tools.set_listtiles(self.group,self.level,size,'p',None,"potion",False,pygame.image.load('res/potion.png').convert_alpha())
+        tools.set_listtiles(self.group,self.level[0],16,"normal block","res/world art/tileset.png",0)
+        tools.set_listtiles(self.group,self.level[1],16,"bg","res/world art/tileset.png",1)
         self.phsyics_bodies = [x.rect for x in self.group if x.name == 'normal block']
     def special_blocks(self):
         for block in self.group.sprites():
@@ -39,7 +37,7 @@ class game():
             if block.name == 'heal' and block.rect.colliderect(self.player.rect):
                 self.player.heal_timer += 4
             if block.name == 'potion' and block.rect.colliderect(self.player.rect):
-                self.level[block.level_y][block.level_x] = ""
+                self.level[block.level_z,block.level_y,block.level_x] = -1
                 self.group.remove(block)
                 self.player.potions += 1
 
@@ -89,7 +87,7 @@ class game():
             rect.y -= self.scroll[1]
 #  player
     def spawns(self):
-        self.player = player((0,0),self.screen)
+        self.player = player((100,100),self.screen)
         rects = [self.player.rect]
         self.camera_entities.extend(rects)
 # events

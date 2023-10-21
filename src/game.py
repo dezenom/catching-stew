@@ -24,9 +24,11 @@ class game():
     def level_creation(self):
         self.group = pygame.sprite.Group()
         size = 16
-        tools.set_listtiles(self.group,self.level[0],16,"normal block","res/world art/tileset.png",0)
-        tools.set_listtiles(self.group,self.level[1],16,"bg","res/world art/tileset.png",1)
+        tools.array_tiles(self.group,self.level[0],16,"normal block","res/world art/tileset.png",0,None)
+        tools.array_tiles(self.group,self.level[1],16,"ramp","res/world art/tileset.png",1,"left")
+        tools.array_tiles(self.group,self.level[2],16,"ramp","res/world art/tileset.png",1,"right")
         self.phsyics_bodies = [x.rect for x in self.group if x.name == 'normal block']
+        self.ramps = [(x.rect,x.ramp_type) for x in self.group if x.name == 'ramp']
     def special_blocks(self):
         for block in self.group.sprites():
             if block.name == 'trap' and block.rect.colliderect(self.player.rect) and self.player.immunity > 100:
@@ -108,15 +110,15 @@ class game():
     
     def spritecontrol(self):
         self.camera()
-        self.group.draw(self.screen)
         self.player.update()
-        tools.platformer_physics(self.player,self.phsyics_bodies)
         self.group.update(self.scroll)
+        self.group.draw(self.screen)
+        self.player.rect=tools.platformer_physics(self.player,self.phsyics_bodies,self.ramps)
 
 
     def run(self):
         self.checkpoints()
         self.respawn()
         self.event_handler()
-        self.spritecontrol()
         self.special_blocks()
+        self.spritecontrol()

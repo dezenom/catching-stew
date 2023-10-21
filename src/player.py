@@ -1,7 +1,7 @@
 import pygame,math
 from tools import frames,render_text
-from particles.basic import particle_system
-from save_load_support import save_loadsystem
+from support.particles import particle_system
+from support.save_load_support import save_loadsystem
 
 save_system = save_loadsystem('.save','data')
 

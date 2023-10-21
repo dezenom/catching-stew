@@ -1,6 +1,8 @@
 import pygame,tools,sys
 from player import player
-from save_load_support import save_loadsystem
+from support.save_load_support import save_loadsystem
+from support.dialogue_system import NPC
+from numpy import genfromtxt
 
 save_system = save_loadsystem('.save','data')
 class game():
@@ -19,6 +21,7 @@ class game():
         self.player.load_variables()
         # menu
         self.click = False
+        self.next_text = False
         self.pause = False
 #   level
     def level_creation(self):
@@ -90,7 +93,10 @@ class game():
 #  player
     def spawns(self):
         self.player = player((100,100),self.screen)
-        rects = [self.player.rect]
+        self.all_npc = pygame.sprite.Group()
+        self.npc = NPC(self.all_npc,(200,200),pygame.Surface((20,20)),
+                       genfromtxt("npc.txt",dtype = "str",delimiter=","),self.screen,self.player.rect)
+        rects = [self.player.rect,self.npc.rect]
         self.camera_entities.extend(rects)
 # events
     def event_handler(self):
@@ -100,12 +106,15 @@ class game():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w or event.key == pygame.K_SPACE:
+                if event.key == pygame.K_w:
                     self.player.jump = True
+                if  event.key == pygame.K_DOWN:
+                    self.next_text = True
                 if event.key == pygame.K_ESCAPE:
                     self.pause = not self.pause
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.click = True
+
 # sprites
     
     def spritecontrol(self):
@@ -113,6 +122,8 @@ class game():
         self.player.update()
         self.group.update(self.scroll)
         self.group.draw(self.screen)
+        self.all_npc.update(self.next_text)
+        self.next_text = False
         self.player.rect=tools.platformer_physics(self.player,self.phsyics_bodies,self.ramps)
 
 

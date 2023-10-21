@@ -9,6 +9,7 @@ from src.tools import buttons
 from src.settings import *
 
 screen = pygame.display.set_mode((width,height),pygame.SCALED)
+
 clock = pygame.time.Clock()
 
 def main_menu():
@@ -89,6 +90,7 @@ def game_loop():
     running_game = True
 
     while running_game:
+        pygame.display.set_caption(f"{clock.get_fps()}")
         screen.fill("grey")
         clock.tick(60)
 
